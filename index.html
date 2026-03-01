@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundations Flashcards</title>
+
+    <!-- Importing nice fonts from Google -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:ital@1&family=Outfit:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Base page styling */
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: #f4f1ea;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        max-width: 600px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+      }
+
+      /* The Grid layout that holds all our cards */
+      .board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        width: 100%;
+        max-width: 1100px;
+      }
+
+      /* --- THE FLASHCARD MAGIC HAPPENS HERE --- */
+
+      /* 1. The Container gives the 3D perspective */
+      .card-container {
+        perspective: 1000px;
+        height: 350px;
+      }
+
+      /* 2. The Inner part actually flips */
+      .card-inner {
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        transform-style: preserve-3d;
+        cursor: pointer;
+        position: relative;
+      }
+
+      /* When the 'flipped' class is added via Javascript, it rotates 180 degrees */
+      .card-inner.flipped {
+        transform: rotateY(180deg);
+      }
+
+      /* 3. The Front and Back faces */
+      .card-front,
+      .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      /* Front side styling */
+      .card-front {
+        background: linear-gradient(135deg, #ffffff, #fdfbf7);
+        border-top: 6px solid #3498db;
+      }
+
+      .card-front .theme {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #95a5a6;
+        margin-bottom: 15px;
+      }
+
+      .card-front h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin: 0 0 20px 0;
+      }
+
+      .card-front .hint {
+        font-size: 0.9rem;
+        color: #bdc3c7;
+        background: #f8f9fa;
+        padding: 8px 16px;
+        border-radius: 20px;
+      }
+
+      /* Back side styling */
+      .card-back {
+        background: #2c3e50;
+        color: white;
+        transform: rotateY(180deg);
+        border-top: 6px solid #2ecc71;
+        overflow-y: auto; /* Adds scroll if text is too long */
+      }
+
+      .card-back h3 {
+        color: #2ecc71;
+        font-size: 1.2rem;
+        margin: 0 0 15px 0;
+      }
+
+      .card-back .verse {
+        font-family: "Merriweather", serif;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        font-style: italic;
+      }
+
+      .card-back .encouragement {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #bdc3c7;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Foundations</h1>
+      <p>
+        A season of laying groundwork. Click a card to flip it and reveal the
+        verse.
+      </p>
+    </div>
+
+    <!-- The container where javascript will inject our cards -->
+    <div class="board" id="flashcard-board"></div>
+
+    <script>
+      // 1. The Data
+      const flashcardsData = [
+        {
+          theme: "Wisdom & Study",
+          title: "Ask for Guidance",
+          reference: "James 1:5",
+          verse:
+            "If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.",
+          encouragement:
+            "Don't rely just on your own intellect. As you study, invite God into the process. He loves to give clarity.",
+        },
+        {
+          theme: "Wisdom & Study",
+          title: "The Supreme Thing",
+          reference: "Proverbs 4:7",
+          verse:
+            "The beginning of wisdom is this: Get wisdom. Though it cost all you have, get understanding.",
+          encouragement:
+            "Grades are great, but true understanding is the real prize. Keep seeking the deeper meaning behind what you learn.",
+        },
+        {
+          theme: "Work & Profession",
+          title: "Work as Worship",
+          reference: "Colossians 3:23",
+          verse:
+            "Whatever you do, work at it with all your heart, as working for the Lord, not for human masters.",
+          encouragement:
+            "Your future career and your current studies are a way to honor God. Give it your absolute best effort.",
+        },
+        {
+          theme: "Work & Profession",
+          title: "Commit Your Plans",
+          reference: "Proverbs 16:3",
+          verse:
+            "Commit to the Lord whatever you do, and he will establish your plans.",
+          encouragement:
+            "As you lay your professional foundations, surrender your ambitions to Him. Let Him guide your steps.",
+        },
+        {
+          theme: "Faith Foundation",
+          title: "The Solid Rock",
+          reference: "Matthew 7:24",
+          verse:
+            "Therefore everyone who hears these words of mine and puts them into practice is like a wise man who built his house on the rock.",
+          encouragement:
+            "The strongest life is built on obedience to Christ. When storms come, this foundation will keep you standing.",
+        },
+        {
+          theme: "Personal Character",
+          title: "Guard Your Mind",
+          reference: "Philippians 4:8",
+          verse:
+            "Finally, brothers and sisters, whatever is true, noble, right, pure, lovely... think about such things.",
+          encouragement:
+            "During busy seasons, stress can bring negativity. Actively choose to fill your mind with good, uplifting things.",
+        },
+        {
+          theme: "Faith Foundation",
+          title: "Keep Going",
+          reference: "Galatians 6:9",
+          verse:
+            "Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up.",
+          encouragement:
+            "Studying and laying foundations can feel exhausting with no immediate reward. Keep pushing forward; the results of your hard work will come in due time.",
+        },
+        {
+          theme: "Personal Character",
+          title: "Trade Worry for Peace",
+          reference: "Philippians 4:6",
+          verse:
+            "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.",
+          encouragement:
+            "When exams, deadlines, or future uncertainties make you anxious, turn that worry into prayer. God promises to trade your anxiety for His unexplainable peace.",
+        },
+      ];
+
+      // 2. Select the board element from the HTML
+      const board = document.getElementById("flashcard-board");
+
+      // 3. Loop through our data array and build HTML for each card
+      flashcardsData.forEach((card) => {
+        const container = document.createElement("div");
+        container.className = "card-container";
+
+        container.innerHTML = `
+                <div class="card-inner" onclick="this.classList.toggle('flipped')">
+                    <div class="card-front">
+                        <span class="theme">${card.theme}</span>
+                        <h2>${card.title}</h2>
+                        <span class="hint">Click to flip</span>
+                    </div>
+                    <div class="card-back">
+                        <h3>${card.reference}</h3>
+                        <p class="verse">"${card.verse}"</p>
+                        <div class="encouragement">
+                            <strong>Encouragement:</strong><br>
+                            ${card.encouragement}
+                        </div>
+                    </div>
+                </div>
+            `;
+        board.appendChild(container);
+      });
+    </script>
+  </body>
+</html>
